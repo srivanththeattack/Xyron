@@ -1,12 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { InstanceType } from '../types/instance';
 
 interface DashboardProps {
-  onLaunch: () => void;
+  onLaunch: (type: InstanceType) => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onLaunch }) => {
-  const instances = ['General Work', 'Red Teaming', 'Privacy'];
+  const instances: { name: string; type: InstanceType }[] = [
+    { name: 'General Work', type: 'general' },
+    { name: 'Red Teaming', type: 'red-team' },
+    { name: 'Privacy', type: 'privacy' },
+  ];
 
   return (
     <motion.div 
@@ -22,7 +27,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch }) => {
           </ul>
         </div>
         <button 
-          onClick={onLaunch}
+          onClick={() => onLaunch('general')}
           className="w-full bg-white text-black py-2 rounded-xl font-medium hover:bg-zinc-200 transition"
         >
           New Instance
@@ -32,8 +37,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch }) => {
         <h1 className="text-6xl font-light mb-12">Hello, Madhu</h1>
         <div className="grid grid-cols-3 gap-6">
           {instances.map((inst) => (
-            <div key={inst} onClick={onLaunch} className="glass p-6 rounded-2xl cursor-pointer hover:bg-white/10 transition">
-              <h3 className="text-xl">{inst}</h3>
+            <div key={inst.type} onClick={() => onLaunch(inst.type)} className="glass p-6 rounded-2xl cursor-pointer hover:bg-white/10 transition">
+              <h3 className="text-xl">{inst.name}</h3>
             </div>
           ))}
         </div>
