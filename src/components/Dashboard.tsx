@@ -1,16 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { InstanceType } from '../types/instance';
+import { InstanceType, InstanceSecurityConfig } from '../types/instance';
 
 interface DashboardProps {
   onLaunch: (type: InstanceType) => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onLaunch }) => {
-  const instances: { name: string; type: InstanceType }[] = [
-    { name: 'General Work', type: 'general' },
-    { name: 'Red Teaming', type: 'red-team' },
-    { name: 'Privacy', type: 'privacy' },
+  const instances: { name: string; type: InstanceType; description: string }[] = [
+    { name: 'General Work', type: 'general', description: 'Productivity & everyday tasks' },
+    { name: 'Red Teaming', type: 'red-team', description: 'Offensive security tooling' },
+    { name: 'Privacy', type: 'privacy', description: 'Tor-routed anonymous session' },
   ];
 
   return (
@@ -20,10 +20,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch }) => {
     >
       <aside className="w-64 glass m-4 rounded-3xl p-6 flex flex-col justify-between">
         <div>
-          <h2 className="text-zinc-500 font-semibold mb-6">Xyron</h2>
+          <h2 className="text-zinc-500 font-semibold mb-6">FluidGrid</h2>
           <ul className="space-y-4">
-            <li className="text-zinc-300">Snapshots</li>
-            <li className="text-zinc-300">Settings</li>
+            <li className="text-zinc-300 cursor-pointer hover:text-white transition">Snapshots</li>
+            <li className="text-zinc-300 cursor-pointer hover:text-white transition">Settings</li>
           </ul>
         </div>
         <button 
@@ -37,8 +37,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch }) => {
         <h1 className="text-6xl font-light mb-12">Hello, Madhu</h1>
         <div className="grid grid-cols-3 gap-6">
           {instances.map((inst) => (
-            <div key={inst.type} onClick={() => onLaunch(inst.type)} className="glass p-6 rounded-2xl cursor-pointer hover:bg-white/10 transition">
-              <h3 className="text-xl">{inst.name}</h3>
+            <div 
+              key={inst.type} 
+              onClick={() => onLaunch(inst.type)} 
+              className={`glass p-6 rounded-2xl cursor-pointer hover:bg-white/10 transition border-2 ${InstanceSecurityConfig[inst.type].color}`}
+            >
+              <h3 className="text-xl mb-2">{inst.name}</h3>
+              <p className="text-sm text-zinc-500">{inst.description}</p>
             </div>
           ))}
         </div>

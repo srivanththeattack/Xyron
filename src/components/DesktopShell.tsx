@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const DesktopShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (

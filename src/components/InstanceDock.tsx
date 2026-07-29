@@ -1,21 +1,35 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const InstanceDock: React.FC = () => {
-  const apps = ['Terminal', 'Browser', 'Files', 'Settings'];
+interface InstanceDockProps {
+  onOpenApp?: (app: string) => void;
+}
+
+const InstanceDock: React.FC<InstanceDockProps> = ({ onOpenApp }) => {
+  const apps = [
+    { name: 'Terminal', icon: '>_' },
+    { name: 'Browser', icon: '🌐' },
+    { name: 'Files', icon: '📁' },
+    { name: 'Chat', icon: '💬' },
+    { name: 'Network', icon: '🔌' },
+  ];
+
   return (
     <motion.div 
       initial={{ y: 100 }} animate={{ y: 0 }}
       className="glass mx-auto mb-6 px-6 py-3 rounded-3xl flex gap-6"
     >
       {apps.map(app => (
-        <motion.div 
-          key={app}
-          whileHover={{ scale: 1.2 }}
-          className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center text-xs text-zinc-400"
+        <motion.button
+          key={app.name}
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onOpenApp?.(app.name.toLowerCase())}
+          className="w-12 h-12 bg-zinc-800 hover:bg-zinc-700 rounded-2xl flex items-center justify-center text-xs text-zinc-400 transition-colors cursor-pointer"
+          title={app.name}
         >
-          {app[0]}
-        </motion.div>
+          <span className="text-base">{app.icon}</span>
+        </motion.button>
       ))}
     </motion.div>
   );
