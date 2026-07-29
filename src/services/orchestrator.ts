@@ -1,52 +1,43 @@
-/**
- * Xyron Orchestrator Engine
- * Manages the full lifecycle of ephemeral containers with security isolation.
- * Bridges the UI layer with the backend API.
- */
-
 import { InstanceType, InstanceConfig, getDefaultSecurityPolicy } from '../types/instance';
-import {
-  apiSpawnInstance,
-  apiStopInstance,
-  apiPauseInstance,
-  apiResumeInstance,
-  apiGetInstanceLogs,
-  apiGetVpnStatus,
-  apiVpnConnect,
-  apiVpnDisconnect,
-  apiGetTorStatus,
-} from './api';
+import { apiSpawnInstance, apiStopInstance, apiPauseInstance, apiResumeInstance, apiGetInstanceLogs } from './api';
+import { startStatsTracking, stopStatsTracking, getBootLogs } from './container';
+import { connectVpn, disconnectVpn } from './vpn';
 
 // ─── Container Lifecycle ───────────────────────────────────────────────
 
 export const spawnInstance = async (type: InstanceType): Promise<InstanceConfig> => {
   const policy = getDefaultSecurityPolicy(type);
-  console.log(`[Orchestrator] Spawning ${type} instance with policy:`, policy);
+  console.log(`[Orchestrator] Spawning ${type} instance`);
+  console.log(`[Orchestrator] Security policy:`, policy);
 
-  // Enforce zero-log for privacy/red-team instances
+  // Boot sequence simulation
+  const bootLogs = getBootLogs(type);
+  for (const line of bootLogs) {
+    console.log(`[Boot] ${line}`);
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  // Enforce zero-log
   if (policy.zero_log) {
     console.log('[Orchestrator] Zero-log policy active — no session data will persist');
   }
 
-  // Connect VPN if enabled
+  // VPN for privacy instances
   if (policy.vpn_enabled) {
-    console.log('[Orchestrator] WireGuard VPN connect requested');
-    const vpnStatus = await apiVpnConnect();
-    console.log(`[Orchestrator] VPN ${vpnStatus.status}`);
+    console.log('[Orchestrator] Connecting WireGuard VPN...');
+    await connectVpn();
+    console.log('[Orchestrator] VPN connected');
   }
 
-  // Route through Tor if required
-  if (policy.network_mode === 'tor') {
-    console.log('[Orchestrator] Tor routing enabled for privacy instance');
-    const torStatus = await apiGetTorStatus();
-    console.log(`[Orchestrator] Tor circuit: ${torStatus.circuit}`);
-  }
-
-  return await apiSpawnInstance(type);
+  const instance = await apiSpawnInstance(type);
+  startStatsTracking(instance.instance_id);
+  return instance;
 };
 
 export const stopInstance = async (id: string): Promise<void> => {
   console.log(`[Orchestrator] Stopping instance ${id}`);
+  stopStatsTracking(id);
+  await disconnectVpn();
   await apiStopInstance(id);
 };
 
@@ -66,20 +57,12 @@ export const getInstanceLogs = async (id: string): Promise<string[]> => {
 
 // ─── VPN ───────────────────────────────────────────────────────────────
 
-export const getVpnStatus = async () => {
-  return await apiGetVpnStatus();
-};
-
-export const connectVpn = async () => {
-  return await apiVpnConnect();
-};
-
-export const disconnectVpn = async () => {
-  return await apiVpnDisconnect();
-};
+export { getVpnStatus, connectVpn, disconnectVpn } from './vpn';
 
 // ─── Tor ───────────────────────────────────────────────────────────────
 
-export const getTorStatus = async () => {
-  return await apiGetTorStatus();
-};
+export { getTorCircuit } from './tor';
+
+// ─── Container Stats ───────────────────────────────────────────────────
+
+export { getContainerStats } from './container';

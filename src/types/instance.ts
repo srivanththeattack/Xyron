@@ -1,9 +1,9 @@
 export type InstanceType = 'general' | 'red-team' | 'privacy';
-
 export type InstanceStatus = 'booting' | 'running' | 'paused' | 'stopped' | 'error';
+export type NetworkMode = 'bridged' | 'isolated' | 'tor';
 
 export interface SecurityPolicy {
-  network_mode: 'bridged' | 'isolated' | 'tor';
+  network_mode: NetworkMode;
   readonly_rootfs: boolean;
   capabilities_drop: string[];
   tmpfs_size: string;
@@ -19,6 +19,49 @@ export interface InstanceConfig {
   persistence: { enabled: boolean };
   status: InstanceStatus;
   created_at: string;
+}
+
+export interface ContainerStats {
+  cpu_usage: number;
+  memory_usage: number;
+  memory_limit: number;
+  uptime_seconds: number;
+  network_rx: number;
+  network_tx: number;
+}
+
+export interface Snapshot {
+  id: string;
+  name: string;
+  instance_type: InstanceType;
+  created_at: string;
+  size_bytes: number;
+  encrypted: boolean;
+  data: string; // base64-encoded encrypted blob
+}
+
+export interface VpnStatus {
+  connected: boolean;
+  ip: string;
+  protocol: 'wireguard';
+  handshake_seconds: number;
+  transfer_rx: number;
+  transfer_tx: number;
+  endpoint: string;
+}
+
+export interface TorCircuit {
+  enabled: boolean;
+  nodes: TorNode[];
+  circuit_id: string;
+  build_time_ms: number;
+}
+
+export interface TorNode {
+  country: string;
+  ip: string;
+  role: 'entry' | 'middle' | 'exit' | 'destination';
+  latency_ms: number;
 }
 
 export const InstanceSecurityConfig: Record<InstanceType, { color: string; label: string; border: string }> = {
