@@ -66,7 +66,7 @@ const InstanceView: React.FC<InstanceViewProps> = ({ onExit, type }) => {
   const renderAppView = useCallback((app: ActiveApp) => {
     switch (app) {
       case 'chat': return <Chat />;
-      case 'browser': return <BrowserView />;
+      case 'browser': return <BrowserView type={type} />;
       case 'files': return <FilesView />;
       case 'network': return <NetworkView />;
       case 'terminal':
@@ -167,7 +167,7 @@ const InstanceView: React.FC<InstanceViewProps> = ({ onExit, type }) => {
         </AnimatePresence>
       </div>
 
-      <UtilityTray />
+      <UtilityTray type={type} />
       <InstanceDock onOpenApp={handleOpenApp} />
     </motion.div>
   );

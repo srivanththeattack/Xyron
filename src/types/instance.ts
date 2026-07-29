@@ -1,4 +1,5 @@
-export type InstanceType = 'general' | 'red-team' | 'privacy';
+export type InstanceType = 'general' | 'cybersec' | 'dev' | 'private';
+
 export type InstanceStatus = 'booting' | 'running' | 'paused' | 'stopped' | 'error';
 export type NetworkMode = 'bridged' | 'isolated' | 'tor';
 
@@ -37,7 +38,7 @@ export interface Snapshot {
   created_at: string;
   size_bytes: number;
   encrypted: boolean;
-  data: string; // base64-encoded encrypted blob
+  data: string;
 }
 
 export interface VpnStatus {
@@ -64,37 +65,82 @@ export interface TorNode {
   latency_ms: number;
 }
 
-export const InstanceSecurityConfig: Record<InstanceType, { color: string; label: string; border: string }> = {
-  'general': { color: 'border-zinc-700', label: 'General', border: 'border-zinc-700' },
-  'red-team': { color: 'border-red-600', label: 'Red Team', border: 'border-red-600' },
-  'privacy': { color: 'border-blue-500', label: 'Privacy', border: 'border-blue-500' },
+// ─── Instance Type Config ──────────────────────────────────────────────
+
+export interface InstanceTypeMeta {
+  color: string;
+  label: string;
+  border: string;
+  icon: string;
+  description: string;
+}
+
+export const InstanceSecurityConfig: Record<InstanceType, InstanceTypeMeta> = {
+  'general': {
+    color: 'border-zinc-700',
+    label: 'General',
+    border: 'border-zinc-700',
+    icon: '📋',
+    description: 'Productivity suite — spreadsheets, documents, presentations',
+  },
+  'cybersec': {
+    color: 'border-red-600',
+    label: 'Cybersec',
+    border: 'border-red-600',
+    icon: '🛡️',
+    description: 'Offensive security toolkit — nmap, Metasploit, Burp Suite',
+  },
+  'dev': {
+    color: 'border-cyan-500',
+    label: 'Dev',
+    border: 'border-cyan-500',
+    icon: '💻',
+    description: 'Development environment — code, terminal, containers',
+  },
+  'private': {
+    color: 'border-purple-500',
+    label: 'Private',
+    border: 'border-purple-500',
+    icon: '🔒',
+    description: 'Anonymous browsing — Tor-routed, encrypted, zero-log',
+  },
 };
 
 export const InstanceTooling: Record<InstanceType, string[]> = {
-  'general': ['browser', 'terminal', 'files'],
-  'red-team': ['nmap', 'metasploit', 'burpsuite', 'terminal'],
-  'privacy': ['tor-browser', 'signal', 'terminal'],
+  'general': ['spreadsheets', 'presentations', 'documents', 'calculator'],
+  'cybersec': ['nmap', 'metasploit', 'burpsuite', 'wireshark', 'nikto', 'terminal'],
+  'dev': ['vscode', 'terminal', 'git', 'docker', 'node'],
+  'private': ['tor-browser', 'signal', 'encrypted-notes', 'terminal'],
 };
 
 export const getDefaultSecurityPolicy = (type: InstanceType): SecurityPolicy => {
   switch (type) {
-    case 'red-team':
+    case 'cybersec':
       return {
         network_mode: 'isolated',
         readonly_rootfs: true,
         capabilities_drop: ['ALL'],
-        tmpfs_size: '256m',
+        tmpfs_size: '512m',
         vpn_enabled: false,
         zero_log: true,
       };
-    case 'privacy':
+    case 'private':
       return {
         network_mode: 'tor',
         readonly_rootfs: true,
         capabilities_drop: ['ALL'],
-        tmpfs_size: '128m',
+        tmpfs_size: '256m',
         vpn_enabled: true,
         zero_log: true,
+      };
+    case 'dev':
+      return {
+        network_mode: 'bridged',
+        readonly_rootfs: false,
+        capabilities_drop: [],
+        tmpfs_size: '1g',
+        vpn_enabled: false,
+        zero_log: false,
       };
     case 'general':
     default:
